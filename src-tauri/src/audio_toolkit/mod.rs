@@ -3,6 +3,7 @@ pub mod constants;
 pub mod text;
 pub mod utils;
 pub mod vad;
+pub mod sherpa_onnx;
 
 pub use audio::{
     is_microphone_access_denied, is_no_input_device_error, list_input_devices, list_output_devices,

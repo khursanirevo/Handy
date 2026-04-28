@@ -27,6 +27,7 @@ use transcribe_rs::{
     whisper_cpp::{WhisperEngine, WhisperInferenceParams},
     SpeechModel, TranscribeOptions,
 };
+use crate::audio_toolkit::sherpa_onnx::SherpaOnnxEngine;
 
 #[derive(Clone, Debug, Serialize)]
 pub struct ModelStateEvent {
@@ -45,6 +46,7 @@ enum LoadedEngine {
     GigaAM(GigaAMModel),
     Canary(CanaryModel),
     Cohere(CohereModel),
+    SherpaOnnx(SherpaOnnxEngine),
 }
 
 /// RAII guard that clears the `is_loading` flag and notifies waiters on drop.
@@ -377,6 +379,14 @@ impl TranscriptionManager {
                 })?;
                 LoadedEngine::Cohere(engine)
             }
+            EngineType::SherpaOnnx => {
+                SherpaOnnxEngine::load_model(&model_path).map_err(|e| {
+                    let error_msg = format!("Failed to load SherpaOnnx model {}: {}", model_id, e);
+                    emit_loading_failed(&error_msg);
+                    anyhow::anyhow!(error_msg)
+                })?
+            }
+            }
         };
 
         // Update the current engine and model ID
@@ -628,6 +638,15 @@ impl TranscriptionManager {
                             cohere_engine
                                 .transcribe(&audio, &options)
                                 .map_err(|e| anyhow::anyhow!("Cohere transcription failed: {}", e))
+                        }
+                        LoadedEngine::SherpaOnnx(sherpa_onnx_engine) => {
+                            sherpa_onnx_engine
+                                .transcribe_samples(audio)
+                                .map(|text| transcribe_rs::TranscriptionResult {
+                                    text,
+                                    segments: Some(Vec::new()),
+                                })
+                                .map_err(|e| anyhow::anyhow!("SherpaOnnx transcription failed: {}", e))
                         }
                     }
                 },

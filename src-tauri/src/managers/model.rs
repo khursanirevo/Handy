@@ -27,6 +27,7 @@ pub enum EngineType {
     GigaAM,
     Canary,
     Cohere,
+    SherpaOnnx,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
@@ -606,6 +607,32 @@ impl ModelManager {
                 is_recommended: false,
                 supported_languages: cohere_languages,
                 supports_language_selection: true,
+                is_custom: false,
+            },
+        );
+
+        // SherpaOnnx Malaysian model
+        available_models.insert(
+            "sherpa-onnx-malaysian".to_string(),
+            ModelInfo {
+                id: "sherpa-onnx-malaysian".to_string(),
+                name: "SherpaOnnx Malaysian".to_string(),
+                description: "SherpaOnnx model for Malaysian language.".to_string(),
+                filename: "malaysian-pruned_transducer_stateless7".to_string(),
+                url: Some("https://huggingface.co/Revolab/malaysian-pruned_transducer_stateless7/resolve/main/zipformer-large-20k.tar.gz".to_string()),
+                sha256: None,
+                size_mb: 1000,
+                is_downloaded: false,
+                is_downloading: false,
+                partial_size: 0,
+                is_directory: true,
+                engine_type: EngineType::SherpaOnnx,
+                accuracy_score: 0.70,
+                speed_score: 0.70,
+                supports_translation: false,
+                is_recommended: false,
+                supported_languages: vec!["ms".to_string()],
+                supports_language_selection: false,
                 is_custom: false,
             },
         );
